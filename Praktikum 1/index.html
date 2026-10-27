@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="author" content="Vergissmeinnicht. (Tyasto Prima Ahmadi)">
+  <meta name="creator" content="Tyasto Prima Ahmadi">
+  <meta name="description" content="Virtual Industrial Automation Laboratory. Praktikum Otomasi Industri, S1 Teknik Industri. Dikembangkan oleh Vergissmeinnicht. (Tyasto Prima Ahmadi), Teknik Industri, Universitas Indonesia Mandiri.">
+  <meta name="keywords" content="otomasi industri, simulasi, teknik industri, laboratorium virtual, Vergissmeinnicht, Tyasto Prima Ahmadi">
+  <title>Virtual Industrial Automation Laboratory | Vergissmeinnicht. (Tyasto Prima Ahmadi)</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<!--
+  Virtual Industrial Automation Laboratory
+  Author     : Vergissmeinnicht. (Tyasto Prima Ahmadi)
+  Affiliation: Teknik Industri, Universitas Indonesia Mandiri
+  Version    : Final Revision
+-->
+<body>
+
+<header>
+  <div class="logo">VIA</div>
+  <div class="header-title">
+    <h1>Virtual Industrial Automation Laboratory</h1>
+    <p>Praktikum Otomasi Industri: S1 Teknik Industri · Simulasi Kejadian Diskret · Data Sintetis</p>
+  </div>
+  <div class="header-credit">
+    <div class="author">Vergissmeinnicht.</div>
+    <div class="affil">Tyasto Prima Ahmadi<br>Teknik Industri, Universitas Indonesia Mandiri</div>
+  </div>
+</header>
+
+<nav id="tabs">
+  <button data-tab="lab" class="active">Laboratorium</button>
+  <button data-tab="diag">Diagnostik</button>
+  <button data-tab="compare">Perbandingan Skenario</button>
+  <button data-tab="exp">Modul Eksperimen</button>
+  <button data-tab="data">Data dan Laporan</button>
+  <button data-tab="guide">Panduan dan Asumsi</button>
+</nav>
+
+<main>
+  <section id="tab-lab" class="tab active">
+    <div class="lab-grid">
+      <aside class="panel">
+        <h2>Pengaturan Eksperimen</h2>
+        <label class="section-label">Preset Konfigurasi</label>
+        <div class="preset-row">
+          <button class="btn" data-preset="manual">Sistem Manual</button>
+          <button class="btn" data-preset="partial">Otomasi Parsial</button>
+          <button class="btn" data-preset="full">Otomasi Penuh</button>
+        </div>
+        <label class="section-label">Parameter Eksperimen</label>
+        <div id="paramForm"></div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="btn primary" id="btnApply" style="flex:1">Terapkan Parameter</button>
+          <button class="btn ghost" id="btnResetParam">Reset</button>
+        </div>
+      </aside>
+
+      <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+        <div class="panel">
+          <div class="toolbar">
+            <button class="btn primary" id="btnRun">Jalankan Simulasi</button>
+            <button class="btn" id="btnPause" disabled>Jeda</button>
+            <button class="btn" id="btnStop" disabled>Hentikan</button>
+            <button class="btn danger" id="btnReset">Reset Hasil</button>
+            <button class="btn danger" id="btnClearAll">Bersihkan Semua</button>
+            <div class="spacer"></div>
+            <label class="chip"><input type="checkbox" id="chkAnim" checked> Animasi</label>
+            <label class="chip">Kecepatan
+              <select id="speedSel" class="plain" style="padding:2px 4px">
+                <option value="0.5">0.5 kali</option>
+                <option value="1" selected>1 kali</option>
+                <option value="2">2 kali</option>
+                <option value="4">4 kali</option>
+              </select>
+            </label>
+            <span class="chip" id="cfgChip">Skenario: <b>Manual</b></span>
+          </div>
+          <div class="progress"><i id="progBar"></i></div>
+          <div class="small" id="progLabel">Siap. Tekan "Jalankan Simulasi".</div>
+        </div>
+
+        <div class="panel">
+          <h2>Lini Produksi Virtual</h2>
+          <div class="line" id="lineViz"></div>
+          <div class="bins">
+            <div class="bin good"><div class="lab">Produk Baik</div><div class="val" id="binGood">0</div></div>
+            <div class="bin bad"><div class="lab">Cacat Lolos Inspeksi</div><div class="val" id="binEsc">0</div></div>
+            <div class="bin rework"><div class="lab">Scrap atau Ditolak</div><div class="val" id="binScrap">0</div></div>
+            <div class="bin rework"><div class="lab">Unit Diperiksa</div><div class="val" id="binInsp">0</div></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Indikator Kinerja</h2>
+          <div class="kpis" id="kpiGrid"></div>
+        </div>
+
+        <div class="panel viz-panel">
+          <h2>Visualisasi Data</h2>
+          <div class="charts">
+            <div class="chart-cell"><div class="chart-title"><b>Output kumulatif</b></div><canvas id="chCum"></canvas></div>
+            <div class="chart-cell"><div class="chart-title"><b>Laju output per jam</b></div><canvas id="chRate"></canvas></div>
+            <div class="chart-cell"><div class="chart-title"><b>Utilisasi dan downtime per stasiun</b></div><canvas id="chStn"></canvas></div>
+            <div class="chart-cell"><div class="chart-title"><b>Komposisi hasil akhir</b></div><canvas id="chPie"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-diag" class="tab">
+    <div class="panel">
+      <h2>Diagnostik dan Interpretasi Otomatis</h2>
+      <p class="small">Pesan di bawah dihasilkan dari data simulasi aktual menggunakan aturan diagnostik. Pesan bukan kesimpulan akhir dan wajib diverifikasi mahasiswa.</p>
+      <div id="insights"><div class="small">Belum ada hasil. Jalankan simulasi pada tab Laboratorium terlebih dahulu.</div></div>
+    </div>
+  </section>
+
+  <section id="tab-compare" class="tab">
+    <div class="panel">
+      <h2>Perbandingan Skenario</h2>
+      <p class="small"><b>Cara kerja:</b> Setiap skenario memakai satu set parameter eksplisit. Pilih sumber parameter dari dropdown (Preset Manual, Parsial, Penuh, Parameter Lab saat ini, atau Kustom). Setelah sumber dipilih, buka <i>Lihat atau ubah semua parameter skenario</i> untuk meninjau dan mengubah nilai. Bila satu nilai diubah, sumber otomatis menjadi Kustom. Anda dapat menambah hingga 6 skenario dan menghapus skenario (minimal 2).</p>
+
+      <div id="scenarioGrid" class="scenario-grid"></div>
+
+      <div class="toolbar" style="margin:12px 0">
+        <button class="btn primary" id="btnCompare">Jalankan Perbandingan</button>
+        <button class="btn danger" id="btnClearCompare">Bersihkan Perbandingan</button>
+        <label class="chip">Seed <input type="number" id="cmpSeed" value="12345" style="width:80px" class="plain"></label>
+        <label class="chip">Replikasi <input type="number" id="cmpRep" value="3" min="1" max="30" style="width:60px" class="plain"></label>
+        <span class="chip" id="cmpStatus">Belum dijalankan</span>
+      </div>
+
+      <div id="cmpWrap" style="display:none">
+        <h3>Sumber Parameter Tiap Skenario</h3>
+        <div class="scroll"><table id="cmpParams"></table></div>
+
+        <h3>Perbandingan KPI Lengkap</h3>
+        <div class="scroll"><table id="cmpTable"></table></div>
+
+        <h3>Skor Daya Saing Multikriteria</h3>
+        <div id="criteriaExplainer" class="criteria-explainer"></div>
+
+        <div class="grid2">
+          <div>
+            <h4>Bobot Prioritas Manajemen (total harus 100)</h4>
+            <div id="weightsBox"></div>
+            <div id="scoreTable" style="margin-top:8px"></div>
+            <canvas id="chScore" style="height:240px;margin-top:8px"></canvas>
+          </div>
+          <div>
+            <h4>Detail Nilai dan Normalisasi</h4>
+            <div id="detailCalc"></div>
+            <h4 style="margin-top:12px">Sensitivitas Bobot (perubahan 20 persen per kriteria)</h4>
+            <div id="sensBox" class="small"></div>
+          </div>
+        </div>
+
+        <h3>Grafik Perbandingan</h3>
+        <canvas id="chCmp" style="height:320px"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-exp" class="tab">
+    <div class="panel">
+      <h2>Modul Eksperimen</h2>
+      <p class="small">Alur: rumusan masalah, hipotesis, variabel, baseline, simulasi, analisis, rekomendasi.</p>
+      <div id="expList"></div>
+    </div>
+  </section>
+
+  <section id="tab-data" class="tab">
+    <div class="panel">
+      <h2>Data dan Laporan</h2>
+      <div class="toolbar" style="margin-bottom:10px">
+        <button class="btn primary" id="btnReport">Laporan Simulasi (.pdf)</button>
+        <button class="btn" id="btnExport">Ekspor Data (.csv)</button>
+        <button class="btn danger" id="btnClear">Hapus Data</button>
+        <span class="chip" id="dataCount">0 run</span>
+      </div>
+      <div class="small" style="margin-bottom:8px">
+        <b>Laporan Simulasi (.pdf):</b> pilihan untuk mencetak laporan hasil simulasi terakhir atau rekapitulasi keseluruhan simulasi.<br>
+        <b>Ekspor Data (.csv):</b> pilihan untuk mengekspor data metrik dan konfigurasi dalam format CSV.
+      </div>
+      <div class="scroll"><table id="runTable"></table></div>
+    </div>
+  </section>
+
+  <section id="tab-guide" class="tab">
+    <div class="panel" id="guideBox"></div>
+  </section>
+</main>
+
+<footer>
+  <div>&copy; Virtual Industrial Automation Laboratory</div>
+  <div>Dikembangkan oleh <b>Vergissmeinnicht.</b> (Tyasto Prima Ahmadi) · Teknik Industri, Universitas Indonesia Mandiri</div>
+</footer>
+
+<!-- Modal Konfirmasi -->
+<div id="modal-container" class="modal-container">
+  <div class="modal">
+    <h3 id="modal-title">Konfirmasi</h3>
+    <p id="modal-message"></p>
+    <div class="modal-actions">
+      <button class="btn" id="modal-cancel">Batal</button>
+      <button class="btn danger" id="modal-confirm">Konfirmasi</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Pemilih (untuk ekspor) -->
+<div id="chooser-container" class="modal-container">
+  <div class="modal">
+    <h3 id="chooser-title">Pilih Jenis Ekspor</h3>
+    <p id="chooser-desc" class="small" style="margin-bottom:14px"></p>
+    <div id="chooser-options" class="chooser-list"></div>
+    <div class="modal-actions">
+      <button class="btn" id="chooser-cancel">Batal</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="app.js"></script>
+</body>
+</html>
